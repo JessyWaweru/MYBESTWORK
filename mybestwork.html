@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JESSY.EXE — Portfolio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  :root{
+    --cyan:   #00FFD1;
+    --purple: #7C3AED;
+    --amber:  #F59E0B;
+    --red:    #EF4444;
+    --white:  #F1F5F9;
+    --dim:    #64748B;
+    --bg:     #030712;
+    --card:   #0A0F1E;
+  }
+
+  html,body{
+    width:100%;height:100%;
+    background:var(--bg);
+    color:var(--white);
+    font-family:'Share Tech Mono', monospace;
+    overflow:hidden;
+    user-select:none;
+  }
+
+  #stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+
+  #boot{
+    position:fixed;inset:0;z-index:100;
+    background:var(--bg);
+    display:flex;flex-direction:column;
+    justify-content:center;align-items:flex-start;
+    padding:10vw;
+  }
+  #boot-lines{
+    font-size:clamp(11px,1.4vw,15px);
+    line-height:1.9;
+    color:var(--cyan);
+    max-width:700px;
+  }
+  #boot-lines .dim{color:var(--dim);}
+  #boot-lines .amber{color:var(--amber);}
+  #boot-lines .red{color:var(--red);}
+  #boot-lines .white{color:var(--white);}
+  #boot-lines .cyan{color:var(--cyan);}
+  #cursor{
+    display:inline-block;width:10px;height:1.1em;
+    background:var(--cyan);vertical-align:middle;
+    animation:blink .7s step-end infinite;
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  #boot-cta{
+    margin-top:32px;
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(12px,1.6vw,16px);
+    letter-spacing:.15em;
+    color:var(--bg);
+    background:var(--cyan);
+    border:none;padding:14px 36px;
+    cursor:pointer;
+    clip-path:polygon(8px 0%,100% 0%,100% calc(100% - 8px),calc(100% - 8px) 100%,0% 100%,0% 8px);
+    transition:transform .15s,box-shadow .15s;
+    display:none;
+  }
+  #boot-cta:hover{transform:scale(1.04);box-shadow:0 0 28px var(--cyan);}
+
+  #galaxy{
+    position:fixed;inset:0;z-index:10;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+
+  #galaxy-label{
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(9px,1.1vw,12px);
+    letter-spacing:.3em;
+    color:var(--dim);
+    text-transform:uppercase;
+    position:fixed;top:28px;left:50%;transform:translateX(-50%);
+    white-space:nowrap;
+  }
+  #galaxy-sub{
+    font-size:clamp(9px,1vw,12px);
+    color:var(--dim);
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+    white-space:nowrap;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+
+  #canvas{display:block;cursor:crosshair;}
+
+  #card-overlay{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(3,7,18,.88);
+    backdrop-filter:blur(8px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  #card{
+    background:var(--card);
+    border:1px solid var(--accent-color, var(--cyan));
+    max-width:620px;width:100%;
+    clip-path:polygon(16px 0%,100% 0%,100% calc(100% - 16px),calc(100% - 16px) 100%,0% 100%,0% 16px);
+    padding:36px 40px;
+    position:relative;
+    animation:cardIn .35s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes cardIn{from{opacity:0;transform:scale(.88) translateY(20px);}to{opacity:1;transform:none;}}
+
+  #card-corner-tl,#card-corner-br{
+    position:absolute;width:18px;height:18px;
+    border-style:solid;
+  }
+  #card-corner-tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+  #card-corner-br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+
+  #card-tag{
+    font-size:11px;letter-spacing:.25em;
+    text-transform:uppercase;margin-bottom:10px;
+  }
+  #card-name{
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(18px,2.5vw,26px);
+    font-weight:900;
+    color:var(--white);
+    margin-bottom:14px;
+    line-height:1.15;
+  }
+  #card-stack{
+    display:flex;flex-wrap:wrap;gap:7px;
+    margin-bottom:18px;
+  }
+  .stack-pill{
+    font-size:11px;padding:3px 10px;
+    border:1px solid;
+    letter-spacing:.08em;
+  }
+  #card-desc{
+    font-family:system-ui,sans-serif;
+    font-size:clamp(13px,1.4vw,15px);
+    line-height:1.75;
+    color:#94A3B8;
+    margin-bottom:28px;
+  }
+  #card-links{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .card-btn{
+    font-family:'Share Tech Mono',monospace;
+    font-size:13px;
+    padding:10px 22px;
+    border:1px solid currentColor;
+    text-decoration:none;
+    letter-spacing:.08em;
+    transition:background .18s,color .18s,opacity .18s;
+    cursor:pointer;
+    background:transparent;
+  }
+  .card-btn.primary{
+    color:var(--bg);
+    border:none;
+  }
+  .card-btn.primary:hover{opacity:.85;}
+  .card-btn.secondary{color:var(--dim);border-color:var(--dim);}
+  .card-btn.secondary:hover{color:var(--white);border-color:var(--white);}
+  .card-btn.back{
+    color:var(--dim);border-color:transparent;
+    padding:10px 0;margin-left:auto;
+    font-size:12px;
+  }
+  .card-btn.back:hover{color:var(--white);}
+
+  #card-id{
+    position:absolute;top:14px;right:18px;
+    font-size:10px;color:var(--dim);letter-spacing:.15em;
+  }
+
+  #scanlines{
+    position:fixed;inset:0;pointer-events:none;z-index:200;
+    background:repeating-linear-gradient(
+      to bottom,
+      transparent 0px,transparent 3px,
+      rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px
+    );
+  }
+
+  .hud{position:fixed;z-index:20;pointer-events:none;}
+  #hud-tl{top:16px;left:16px;border-top:1px solid var(--dim);border-left:1px solid var(--dim);width:40px;height:40px;}
+  #hud-tr{top:16px;right:16px;border-top:1px solid var(--dim);border-right:1px solid var(--dim);width:40px;height:40px;}
+  #hud-bl{bottom:16px;left:16px;border-bottom:1px solid var(--dim);border-left:1px solid var(--dim);width:40px;height:40px;}
+  #hud-br{bottom:16px;right:16px;border-bottom:1px solid var(--dim);border-right:1px solid var(--dim);width:40px;height:40px;}
+
+  #tooltip{
+    position:fixed;pointer-events:none;z-index:30;
+    background:rgba(10,15,30,.95);
+    border:1px solid var(--dim);
+    padding:8px 14px;font-size:11px;
+    color:var(--white);letter-spacing:.06em;
+    transform:translate(16px,-50%);
+    display:none;white-space:nowrap;
+  }
+
+  /* mobile adjustments */
+  @media(max-width:600px){
+    #boot{padding:8vw;}
+    #card{padding:24px 20px;}
+    #card-links{gap:8px;}
+    .card-btn{padding:8px 14px;font-size:11px;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div id="scanlines"></div>
+<div class="hud" id="hud-tl"></div>
+<div class="hud" id="hud-tr"></div>
+<div class="hud" id="hud-bl"></div>
+<div class="hud" id="hud-br"></div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div id="boot-lines"></div>
+  <button id="boot-cta" onclick="enterGalaxy()">ENTER THE SYSTEM &nbsp;›</button>
+</div>
+
+<!-- GALAXY -->
+<div id="galaxy">
+  <div id="galaxy-label">JESSY.EXE — PROJECT GALAXY &nbsp;//&nbsp; SELECT A PLANET TO DOCK</div>
+  <canvas id="canvas"></canvas>
+  <div id="galaxy-sub">[ click any planet to explore ]</div>
+</div>
+
+<!-- PROJECT CARD -->
+<div id="card-overlay">
+  <div id="card">
+    <div id="card-corner-tl"></div>
+    <div id="card-corner-br"></div>
+    <div id="card-id"></div>
+    <div id="card-tag"></div>
+    <div id="card-name"></div>
+    <div id="card-stack"></div>
+    <div id="card-desc"></div>
+    <div id="card-links"></div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ── PROJECT DATA ─────────────────────────────────────────
+const PROJECTS = [
+  {
+    id:"SYS-001",
+    name:"DocRank",
+    tag:"Healthcare · Full-Stack",
+    color:"#00FFD1",
+    stack:["Django","React","TypeScript","JWT + OTP","Supabase","Render"],
+    desc:"Doctor discovery and review platform for Kenya. Patients find, rate, and save trusted specialists across Nairobi, Kisumu, and Mombasa. Built with OTP-verified auth, a merit-based ranking engine, real-time debounced search, and optimistic UI updates.",
+    live:"https://docrank.jbnmedia.org",
+    frontend:"https://github.com/JessyWaweru/DOCTOR_SEARCH_FRONTEND",
+    backend:"https://github.com/JessyWaweru/DOCTOR_SEARCH_BACKEND",
+    orbit:120, speed:.0008, angle:0.4, size:22,
+  },
+  {
+    id:"SYS-002",
+    name:"ShopCrawl",
+    tag:"AI · Price Intelligence",
+    color:"#F59E0B",
+    stack:["Django","React.js","Web Crawler","JWT","Render"],
+    desc:"AI-powered price comparison engine that crawls Amazon and Jumia in real time. Applies actuarial Cost-Benefit and Marginal Benefit ratios to rank deals — turning raw e-commerce data into consumer utility scores.",
+    live:"https://shopcrawl-frontend.onrender.com",
+    frontend:"https://github.com/JessyWaweru/SHOPCRAWL-FRONTEND",
+    backend:"https://github.com/JessyWaweru/SHOPCRAWL-BACKEND-PY",
+    orbit:200, speed:.00055, angle:1.9, size:19,
+  },
+  {
+    id:"SYS-003",
+    name:"Tamasha",
+    tag:"Entertainment · Data Aggregation",
+    color:"#A855F7",
+    stack:["Django","React","TypeScript","Cloudscraper","Clerk","shadcn/ui"],
+    desc:"Cinema aggregator and event management platform for Nairobi. Bypasses Cloudflare enterprise bot protection to scrape real-time showtimes. Deeply nested DRF serializers deliver Events → Cinemas → Showtimes in single-payload REST endpoints.",
+    live:"https://tamasha.onrender.com",
+    frontend:"https://github.com/JessyWaweru/TAMASHA-FRONTEND",
+    backend:"https://github.com/JessyWaweru/TAMASHA-BACKEND",
+    orbit:285, speed:.00038, angle:3.7, size:17,
+  },
+  {
+    id:"SYS-004",
+    name:"Freelancer CRM",
+    tag:"SaaS · Client Management",
+    color:"#38BDF8",
+    stack:["Django","React","TypeScript","JWT","Framer Motion","GitHub Pages"],
+    desc:"Private client relationship manager for independent freelancers. Multi-currency project tracking (USD, KES, EUR, GBP), granular payment states, and object-level JWT isolation — your data is invisible to every other user at the API level.",
+    live:"https://jessywaweru.github.io/freelancer-crm-ui/",
+    frontend:"https://github.com/JessyWaweru/freelancer-crm-ui",
+    backend:"https://github.com/JessyWaweru/FREELANCER_CRM",
+    orbit:365, speed:.00027, angle:5.1, size:16,
+  },
+  {
+    id:"SYS-005",
+    name:"Actuarial Risk Model",
+    tag:"Actuarial · Python CLI",
+    color:"#EF4444",
+    stack:["Python","Monte Carlo","VaR / TVaR","ARIMA","NumPy","Matplotlib"],
+    desc:"Modular CLI toolkit for core insurance analytics. Supports premium pricing, stochastic loss simulation across four distributions, reinsurance excess-of-loss layer pricing, and configurable VaR/TVaR risk metrics. The actuarial engine behind the engineering portfolio.",
+    live:null,
+    frontend:null,
+    backend:"https://github.com/JessyWaweru/ACTUARIAL_RISK_MODEL",
+    orbit:438, speed:.00022, angle:2.2, size:14,
+  },
+];
+
+// ── STARFIELD ─────────────────────────────────────────────
+(function(){
+  const c=document.getElementById('stars');
+  const ctx=c.getContext('2d');
+  function resize(){c.width=innerWidth;c.height=innerHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+  const stars=Array.from({length:300},()=>({
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:Math.random()*1.3+.15,
+    o:Math.random()*.6+.1,
+    speed:Math.random()*.5+.05,
+    t:Math.random()*Math.PI*2,
+  }));
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.t+=s.speed*0.016;
+      const o=Math.max(0,Math.min(1, s.o+Math.sin(s.t)*0.28));
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(241,245,249,${o})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── BOOT SEQUENCE ─────────────────────────────────────────
+const BOOT_LINES = [
+  {cls:'dim',  text:'JESSY.EXE v2.6.0 — KERNEL BOOT'},
+  {cls:'dim',  text:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'},
+  {cls:'dim',  text:''},
+  {cls:'cyan', text:'[ OK ]  Mounting actuarial subsystem...'},
+  {cls:'cyan', text:'[ OK ]  Loading Django REST cores...'},
+  {cls:'cyan', text:'[ OK ]  Initialising React renderer...'},
+  {cls:'cyan', text:'[ OK ]  Connecting Supabase PostgreSQL...'},
+  {cls:'cyan', text:'[ OK ]  JWT encryption layer: ACTIVE'},
+  {cls:'dim',  text:''},
+  {cls:'amber',text:'[ SCAN ] Detecting project nodes in local galaxy...'},
+  {cls:'amber',text:'[ SCAN ] SYS-001  DocRank ..................... ONLINE'},
+  {cls:'amber',text:'[ SCAN ] SYS-002  ShopCrawl ................... ONLINE'},
+  {cls:'amber',text:'[ SCAN ] SYS-003  Tamasha ..................... ONLINE'},
+  {cls:'amber',text:'[ SCAN ] SYS-004  Freelancer CRM .............. ONLINE'},
+  {cls:'amber',text:'[ SCAN ] SYS-005  Actuarial Risk Model ......... ONLINE'},
+  {cls:'dim',  text:''},
+  {cls:'white',text:'OPERATOR  : JESSY BRYAN WAWERU'},
+  {cls:'white',text:'CLEARANCE : FULL-STACK + ACTUARIAL'},
+  {cls:'white',text:'STACK     : Python · Django · React · TypeScript · R'},
+  {cls:'dim',  text:''},
+  {cls:'cyan', text:'System ready. 5 project nodes mapped.'},
+  {cls:'cyan', text:'Awaiting operator command...'},
+];
+
+let lineIdx=0, charIdx=0;
+const container=document.getElementById('boot-lines');
+const cta=document.getElementById('boot-cta');
+
+function typeNext(){
+  if(lineIdx>=BOOT_LINES.length){ cta.style.display='block'; return; }
+  const line=BOOT_LINES[lineIdx];
+  if(charIdx===0){
+    const el=document.createElement('div');
+    el.className=line.cls;
+    el.id='cur-line';
+    container.appendChild(el);
+  }
+  const el=container.querySelector('#cur-line');
+  if(charIdx<line.text.length){
+    el.textContent+=line.text[charIdx];
+    charIdx++;
+    setTimeout(typeNext, line.text.length===0 ? 0 : 16+Math.random()*10);
+  } else {
+    el.removeAttribute('id');
+    lineIdx++; charIdx=0;
+    setTimeout(typeNext, line.text.length===0 ? 25 : 55);
+  }
+}
+setTimeout(typeNext, 500);
+
+// ── GALAXY ────────────────────────────────────────────────
+let canvas, ctx, W, H, CX, CY;
+let hoveredPlanet=null;
+const tooltip=document.getElementById('tooltip');
+
+function enterGalaxy(){
+  const boot=document.getElementById('boot');
+  boot.style.transition='opacity .6s';
+  boot.style.opacity='0';
+  setTimeout(()=>{
+    boot.style.display='none';
+    const g=document.getElementById('galaxy');
+    g.style.display='flex';
+    initGalaxy();
+  },600);
+}
+
+function initGalaxy(){
+  canvas=document.getElementById('canvas');
+  ctx=canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  canvas.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('click', onClick);
+  canvas.addEventListener('mouseleave',()=>{
+    hoveredPlanet=null;
+    tooltip.style.display='none';
+    canvas.style.cursor='crosshair';
+  });
+  // touch support
+  canvas.addEventListener('touchend', onTouch, {passive:true});
+  loop();
+}
+
+function resizeCanvas(){
+  W=canvas.width=innerWidth;
+  H=canvas.height=innerHeight;
+  CX=W/2; CY=H/2;
+}
+
+function loop(){
+  requestAnimationFrame(loop);
+  ctx.clearRect(0,0,W,H);
+
+  // centre star glow
+  const grad=ctx.createRadialGradient(CX,CY,0,CX,CY,70);
+  grad.addColorStop(0,'rgba(210,225,255,1)');
+  grad.addColorStop(.25,'rgba(140,170,255,.4)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.arc(CX,CY,70,0,Math.PI*2);
+  ctx.fillStyle=grad; ctx.fill();
+
+  // centre star body
+  ctx.beginPath(); ctx.arc(CX,CY,13,0,Math.PI*2);
+  ctx.fillStyle='#ffffff'; ctx.fill();
+
+  // label
+  ctx.save();
+  ctx.font='10px Share Tech Mono';
+  ctx.fillStyle='rgba(100,116,139,.75)';
+  ctx.textAlign='center';
+  ctx.fillText('JESSY.EXE', CX, CY+27);
+  ctx.restore();
+
+  // planets
+  PROJECTS.forEach(p=>{
+    p.angle += p.speed;
+    const px = CX + Math.cos(p.angle) * p.orbit;
+    const py = CY + Math.sin(p.angle) * p.orbit * 0.36;
+
+    // orbit ring
+    ctx.beginPath();
+    ctx.ellipse(CX,CY, p.orbit, p.orbit*0.36, 0, 0, Math.PI*2);
+    ctx.strokeStyle='rgba(100,116,139,.1)';
+    ctx.lineWidth=1; ctx.stroke();
+
+    const isHov = hoveredPlanet===p;
+
+    // outer glow
+    const glowSize = p.size + (isHov?14:7);
+    const glow=ctx.createRadialGradient(px,py,0,px,py,glowSize*2.2);
+    glow.addColorStop(0, p.color+'77');
+    glow.addColorStop(1,'transparent');
+    ctx.beginPath(); ctx.arc(px,py,glowSize*2.2,0,Math.PI*2);
+    ctx.fillStyle=glow; ctx.fill();
+
+    // planet body
+    const body=ctx.createRadialGradient(
+      px-p.size*.3, py-p.size*.3, p.size*.05,
+      px, py, p.size+(isHov?3:0)
+    );
+    body.addColorStop(0,'#ffffff');
+    body.addColorStop(.18, p.color);
+    body.addColorStop(1, p.color+'33');
+    ctx.beginPath();
+    ctx.arc(px, py, p.size+(isHov?3:0), 0, Math.PI*2);
+    ctx.fillStyle=body; ctx.fill();
+
+    // hover ring
+    if(isHov){
+      ctx.beginPath();
+      ctx.arc(px,py,p.size+7,0,Math.PI*2);
+      ctx.strokeStyle=p.color;
+      ctx.lineWidth=1.5; ctx.stroke();
+    }
+
+    // planet label
+    ctx.save();
+    ctx.font=`${isHov?'bold ':''} ${isHov?13:11}px Share Tech Mono`;
+    ctx.fillStyle = isHov ? p.color : 'rgba(241,245,249,.55)';
+    ctx.textAlign='center';
+    ctx.fillText(p.name, px, py+p.size+17);
+    ctx.restore();
+
+    // store screen pos for hit testing
+    p._px=px; p._py=py;
+  });
+}
+
+function getPlanetAt(mx,my){
+  return PROJECTS.find(p=>{
+    const dx=mx-p._px, dy=my-p._py;
+    return Math.sqrt(dx*dx+dy*dy) < p.size+18;
+  })||null;
+}
+
+function onMouseMove(e){
+  const r=canvas.getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top;
+  const hit=getPlanetAt(mx,my);
+  hoveredPlanet=hit;
+  canvas.style.cursor=hit?'pointer':'crosshair';
+  if(hit){
+    tooltip.style.display='block';
+    tooltip.style.left=e.clientX+'px';
+    tooltip.style.top=e.clientY+'px';
+    tooltip.textContent=`${hit.id} — ${hit.name} // CLICK TO DOCK`;
+  } else {
+    tooltip.style.display='none';
+  }
+}
+
+function onClick(e){
+  const r=canvas.getBoundingClientRect();
+  const hit=getPlanetAt(e.clientX-r.left, e.clientY-r.top);
+  if(hit) openCard(hit);
+}
+
+function onTouch(e){
+  const r=canvas.getBoundingClientRect();
+  const t=e.changedTouches[0];
+  const hit=getPlanetAt(t.clientX-r.left, t.clientY-r.top);
+  if(hit) openCard(hit);
+}
+
+// ── PROJECT CARD ──────────────────────────────────────────
+function openCard(p){
+  const overlay=document.getElementById('card-overlay');
+  const card=document.getElementById('card');
+
+  // accent colour
+  card.style.borderColor=p.color;
+  document.getElementById('card-corner-tl').style.borderColor=p.color;
+  document.getElementById('card-corner-br').style.borderColor=p.color;
+
+  // content
+  document.getElementById('card-id').textContent=p.id;
+
+  const tagEl=document.getElementById('card-tag');
+  tagEl.textContent=`// ${p.tag}`;
+  tagEl.style.color=p.color;
+
+  document.getElementById('card-name').textContent=p.name;
+
+  const stackEl=document.getElementById('card-stack');
+  stackEl.innerHTML='';
+  p.stack.forEach(s=>{
+    const pill=document.createElement('span');
+    pill.className='stack-pill';
+    pill.textContent=s;
+    pill.style.borderColor=p.color;
+    pill.style.color=p.color;
+    stackEl.appendChild(pill);
+  });
+
+  document.getElementById('card-desc').textContent=p.desc;
+
+  const links=document.getElementById('card-links');
+  links.innerHTML='';
+
+  if(p.live){
+    const a=document.createElement('a');
+    a.href=p.live; a.target='_blank'; a.rel='noopener';
+    a.className='card-btn primary';
+    a.textContent='LAUNCH APP ›';
+    a.style.background=p.color;
+    a.style.borderColor=p.color;
+    links.appendChild(a);
+  }
+  if(p.frontend){
+    const a=document.createElement('a');
+    a.href=p.frontend; a.target='_blank'; a.rel='noopener';
+    a.className='card-btn secondary';
+    a.textContent='FRONTEND CODE';
+    links.appendChild(a);
+  }
+  if(p.backend){
+    const a=document.createElement('a');
+    a.href=p.backend; a.target='_blank'; a.rel='noopener';
+    a.className='card-btn secondary';
+    a.textContent=p.frontend ? 'BACKEND CODE' : 'SOURCE CODE';
+    links.appendChild(a);
+  }
+
+  const back=document.createElement('button');
+  back.className='card-btn back';
+  back.textContent='← UNDOCK';
+  back.onclick=closeCard;
+  links.appendChild(back);
+
+  overlay.style.display='flex';
+
+  // click backdrop to close
+  overlay.onclick=function(e){
+    if(e.target===overlay) closeCard();
+  };
+}
+
+function closeCard(){
+  const overlay=document.getElementById('card-overlay');
+  overlay.style.transition='opacity .25s';
+  overlay.style.opacity='0';
+  setTimeout(()=>{
+    overlay.style.display='none';
+    overlay.style.opacity='1';
+    overlay.style.transition='';
+  },250);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeCard();
+});
+</script>
+</body>
+</html>
