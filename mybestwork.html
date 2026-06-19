@@ -579,13 +579,25 @@ function openCard(p){
     a.textContent=label;
     a.style.pointerEvents='all';
     a.style.position='relative';
-    a.style.zIndex='999';
+    a.style.zIndex='9999';
+    a.style.display='inline-block';
     if(cls==='primary'){
       a.style.background=color;
       a.style.borderColor=color;
       a.style.color='#030712';
     }
-    a.addEventListener('click',function(e){ e.stopPropagation(); });
+    // most reliable cross-browser new-tab open on GitHub Pages
+    a.addEventListener('click',function(e){
+      e.stopPropagation();
+      e.preventDefault();
+      const link=document.createElement('a');
+      link.href=href;
+      link.target='_blank';
+      link.rel='noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
     return a;
   }
 
@@ -621,4 +633,4 @@ document.addEventListener('keydown',e=>{
 });
 </script>
 </body>
-</html></html>
+</html>
